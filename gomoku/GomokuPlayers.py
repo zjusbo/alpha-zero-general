@@ -14,12 +14,12 @@ class RandomPlayer():
 
 
 class HumanGomokuPlayer():
-    def __init__(self, game):
+    def __init__(self, game, player):
         self.game = game
-
+        self.player = player
     def play(self, board):
         # display(board)
-        valid = self.game.getValidMoves(board, 1)
+        valid = self.game.getValidMoves(board, self.player)
         for i in range(len(valid)):
             if valid[i]:
                 print("[", i // self.game.n, i % self.game.n, end="] ")

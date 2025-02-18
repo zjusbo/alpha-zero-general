@@ -14,22 +14,22 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 args = dotdict({
     'numIters': 1000,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
-    'tempThreshold': 35,        #
+    'tempThreshold': 60,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-    'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
+    'numMCTSSims': 100,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
 
-    'checkpoint': './checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_128',
-    'load_model': True,
-    'load_folder_file': ('checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_128','best.pth.tar'),
+    'checkpoint': './checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64',
+    'load_model': False,
+    'load_folder_file': ('checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64','best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
-    'num_channels': 128,
+    'num_channels': 64,
     'input_channels': 2,
     'verbose': 0,
     # parallism params
-    'num_workers': 4,
+    'num_workers': 32,
 })
 
 

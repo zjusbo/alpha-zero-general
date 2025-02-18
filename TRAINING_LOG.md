@@ -266,3 +266,126 @@ MCTS
 
 Why there is only one valid move, 
 why 0.09 becomes 0.91, such a big boost after MCTS
+
+This bug is fixed.
+
+## Jan 5th, 2025
+
+Topic: Message queue for CPU and GPU comunication.
+
+ALL MEASUREMENT IS DONE ON MAC MINI 2020.
+
+args = dotdict({
+    'numIters': 1000,
+    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
+    'tempThreshold': 60,        #
+    'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+    'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
+    'numMCTSSims': 100,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 1,
+
+    'checkpoint': './checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64',
+    'load_model': False,
+    'load_folder_file': ('checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64','best.pth.tar'),
+    'numItersForTrainExamplesHistory': 20,
+    'num_channels': 64,
+    'input_channels': 2,
+    # parallism params
+    'num_workers': 1,
+})
+
+No message queue.
+
+Self play with 1 workers: 18s/it. 
+From CPU/GPU history.
+One CPU performance core is in high usage. 
+GPU is in 100% usage.
+
+Self play with 2 workers: 13s/it
+2 CPU performance core is in high usage.
+GPU is 100% usage.
+Python 90% CPU (from monitor)
+
+Self play with 4 workers: 15s/it
+2 CPU performance core in high usage.
+GPU 100%
+Python 100%
+
+Conclusion: Bottleneck is at GPU. CPU is not fully utilized.
+
+Self play with 8 workers: 14s/it (high variance)
+2 CPU performance core in high usage.
+GPU 100%
+Python 100%
+
+
+Message queue, GPU wait for 1ms per batch.
+avg 8 tasks in the queue per batch.
+Self play with 16 workers: 5s/it
+2 CPU performance core in high usage.
+GPU 80% utilization.
+Python 90%
+
+
+Message queue, GPU wait for 1ms per batch.
+avg 17 tasks in the queue per batch.
+
+Self play with 32 workers: 6.38s/it
+3 CPU performance core in middle usage.
+GPU 60% utilization.
+Python 90%
+
+Message queue, GPU wait for 0.5ms per batch.
+17 tasks per batch.
+Self play with 32 workers: 5.5s/it
+3 CPU performance core in middle usage.
+GPU 60% utilization.
+Python 90%
+
+
+Message queue, GPU wait for 0.1ms per batch.
+17 tasks per batch.
+Self play with 32 workers: 5s/it
+2 CPU performance core in middle usage.
+GPU 60% utilization.
+Python 90%
+
+Conclusion: seems to be a bug here. the timeout time needs to be evaluated. 
+
+### Jan 6th, 2025
+
+removed the timeout waiting in the task_queue.get() method. 
+Now in average, there are multiple tasks waiting in the queue when the GPU looping thread is waken up. 
+
+For 32 workers, 5s/it 
+2 CPU performance core is in high usage. 
+
+Sth is wrong. The new model keeps getting rejected. 
+
+args = dotdict({
+    'numIters': 1000,
+    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
+    'tempThreshold': 60,        #
+    'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+    'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
+    'numMCTSSims': 100,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 1,
+
+    'checkpoint': './checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64',
+    'load_model': False,
+    'load_folder_file': ('checkpoints/gomoku/15*15_numeps_100_num_mcts_sims_25_temp_15_input_channels_2_channels_64','best.pth.tar'),
+    'numItersForTrainExamplesHistory': 20,
+    'num_channels': 64,
+    'input_channels': 2,
+    'verbose': 0,
+    # parallism params
+    'num_workers': 32,
+})
+
+The board is 15*15.
+
+# Feb 17， 2025
+So, Let's debug the multithread issue. 
+Reduce the board size to 6*6 and retry. 

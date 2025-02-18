@@ -96,8 +96,12 @@ class Coach():
 
                     with tqdm(total=self.args.numEps, desc=f"Self Play with {self.args.num_workers} workers") as pbar:
                         for future in concurrent.futures.as_completed(futures):
-                            iterationTrainExamples += future.result()
-                            pbar.update(1)
+                            try:
+                                iterationTrainExamples += future.result()
+                            except Exception as e:
+                                log.error(f"Exception in a worker: {e}") 
+                            finally:                               
+                                pbar.update(1)
     
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)

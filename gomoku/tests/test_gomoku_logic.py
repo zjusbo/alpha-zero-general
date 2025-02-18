@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 sys.path.append('../../')
 from gomoku.GomokuLogic import Board 
 
-class TestBoard(unittest.TestCase):
-
+class Test8_8Board(unittest.TestCase):
     def setUp(self):
         self.n = 8
         self.board = Board(self.n)
@@ -168,6 +167,28 @@ class TestBoard(unittest.TestCase):
         moves = self.board._get_all_available_moves_next_to(3, 3, 1)
         expected_moves = [(2, 2), (2, 3), (2, 4), (3, 2), (3, 4), (4, 2), (4, 3), (4, 4)]
         self.assertCountEqual(moves, expected_moves)
+
+class Test15_15Board(unittest.TestCase):
+    def setUp(self):
+        self.n = 15
+        self.board = Board(self.n)
+
+    def test_get_legal_moves_with_a_complicated_pattern(self):
+        # Place some stones and test legal move generation
+        self.board.execute_move((4, 4), 1)
+        self.board.execute_move((8, 6), 1)
+        self.board.execute_move((7, 7), 1)
+        self.board.execute_move((7, 8), 1)
+        self.board.execute_move((9, 9), 1)
+        self.board.execute_move((4, 6), -1)
+        self.board.execute_move((5, 6), -1)
+        self.board.execute_move((6, 6), -1)
+        self.board.execute_move((7, 6), -1)
+
+        legal_moves = self.board.get_legal_moves(-1)
+
+        self.assertEqual(set(legal_moves), set([(0, 0)]))
+
 
 if __name__ == "__main__":
     unittest.main()

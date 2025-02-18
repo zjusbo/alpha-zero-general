@@ -30,7 +30,7 @@ def main():
     # all players
     rp = RandomPlayer(g).play
     gp = GreedyGomokuPlayer(g).play
-    hp = HumanGomokuPlayer(g).play
+    hp = HumanGomokuPlayer(g, -1).play # human player is the second one to move
 
     # nnet players
     n1 = NNet(g, input_channels = 2, num_channels = 128)
